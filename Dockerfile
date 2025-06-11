@@ -2,7 +2,7 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY requirements/base.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r base.txt
 
 COPY . .

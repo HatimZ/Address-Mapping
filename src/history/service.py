@@ -1,30 +1,39 @@
-from src.history.schemas import HistoryListResponse, HistoryResponse
+from src.history.schemas import HistoryListResponse, HistoryResponse, PaginationInfo
 from src.database.base import DatabaseClient
-from src.history.exceptions import HistoryError
+from typing import List
+import math
 
 
 class HistoryService:
     def __init__(self, database_client: DatabaseClient):
         self.database_client = database_client
 
-    async def get_history(self, limit: int) -> HistoryListResponse:
-        try:
-            queries = await self.database_client.get_history(limit)
-            total = await self.database_client.get_total_queries()
+    async def get_history(
+        self, page: int = 1, page_size: int = 10
+    ) -> HistoryListResponse:
+        skip = (page - 1) * page_size
 
-            return HistoryListResponse(
-                queries=[
-                    HistoryResponse(
-                        query_id=query["_id"],
-                        distance_km=query["distance_km"],
-                        address1=query["address1"],
-                        address2=query["address2"],
-                        timestamp=query["timestamp"],
-                    )
-                    for query in queries
-                ],
-                total=total,
-                limit=limit,
+        total = await self.database_client.count()
+        records = await self.database_client.find_many(
+            skip=skip, limit=page_size, sort_by="timestamp", sort_order="desc"
+        )
+
+        total_pages = math.ceil(total / page_size)
+
+        pagination = PaginationInfo(
+            total=total, page=page, page_size=page_size, total_pages=total_pages
+        )
+
+        items = [
+            HistoryResponse(
+                query_id=str(record["_id"]),
+                kilometers=record.get("kilometers"),
+                miles=record.get("miles"),
+                address1=record["address1"],
+                address2=record["address2"],
+                timestamp=record["timestamp"],
             )
-        except Exception as e:
-            raise HistoryError(f"Failed to retrieve history: {str(e)}")
+            for record in records
+        ]
+
+        return HistoryListResponse(items=items, pagination=pagination)

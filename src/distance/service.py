@@ -24,20 +24,23 @@ class DistanceService:
             point1 = (location1["latitude"], location1["longitude"])
             point2 = (location2["latitude"], location2["longitude"])
 
-            distance_km = geodesic(point1, point2).kilometers
-            logger.info(distance_km)
+            kilometers = geodesic(point1, point2).kilometers
+            miles = geodesic(point1, point2).miles
+            logger.info(kilometers, miles)
 
             query_data = {
-                "distance_km": distance_km,
+                "kilometers": kilometers,
+                "miles": miles,
                 "address1": location1["address"],
                 "address2": location2["address"],
                 "coordinates": {"point1": point1, "point2": point2},
             }
 
-            query_id = await self.database_client.save_query(query_data)
+            query_id = await self.database_client.create(query_data)
 
             return DistanceResponse(
-                distance_km=round(distance_km, 2),
+                kilometers=round(kilometers, 2),
+                miles=round(miles, 2),
                 address1=GeoLocation(
                     latitude=location1["latitude"],
                     longitude=location1["longitude"],

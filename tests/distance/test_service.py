@@ -45,7 +45,7 @@ async def test_calculate_distance_success(distance_service):
         "New York, NY", "Los Angeles, CA"
     )
 
-    assert result.distance_km > 0
+    assert result.kilometers > 0
     assert result.query_id == "test_id"
     assert result.address1.address == "New York, NY, USA"
     assert result.address2.address == "Los Angeles, CA, USA"

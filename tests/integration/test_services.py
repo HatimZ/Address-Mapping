@@ -32,7 +32,7 @@ async def test_distance_calculation_integration(distance_service):
         "New York, NY", "Los Angeles, CA"
     )
 
-    assert result.distance_km > 0
+    assert result.kilometers > 0
     assert result.query_id
     assert result.address1.address
     assert result.address2.address

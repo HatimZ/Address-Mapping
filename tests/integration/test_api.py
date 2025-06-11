@@ -21,7 +21,7 @@ async def test_calculate_distance(client):
 
     assert response.status_code == 200
     data = response.json()
-    assert "distance_km" in data
+    assert "kilometers" in data
     assert "address1" in data
     assert "address2" in data
     assert "query_id" in data

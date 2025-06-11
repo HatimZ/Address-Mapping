@@ -1,40 +1,67 @@
 from fastapi import Request, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import ValidationError
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from typing import List, Optional
 import re
-from datetime import datetime
+import html
+from bleach import clean
 import logging
 
-# Rate limiter setup
+
+logger = logging.getLogger(__name__)
+
 limiter = Limiter(key_func=get_remote_address)
 
-# IP blacklist (in production, this should be in a database)
+
 BLACKLISTED_IPS: List[str] = []
 WHITELISTED_IPS: List[str] = []
 
-# Address validation patterns
+
 ADDRESS_PATTERN = re.compile(r"^[a-zA-Z0-9\s,.-]+$")
 MAX_ADDRESS_LENGTH = 200
 
 
-class SecurityMiddleware:
+SQL_PATTERN = re.compile(
+    r"(?i)(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|TRUNCATE|EXEC|DECLARE)"
+)
+HTML_PATTERN = re.compile(r"<[^>]*>")
+SCRIPT_PATTERN = re.compile(r"<script.*?>.*?</script>", re.IGNORECASE | re.DOTALL)
+COMMAND_PATTERN = re.compile(r"[;&|`$]")
+
+
+class SecurityService:
     @staticmethod
-    async def validate_address(address: str) -> str:
-        if not address or len(address) > MAX_ADDRESS_LENGTH:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid address format or length",
+    def validate_input(input: str) -> str:
+        # Checking for SQL injection attempts
+        if SQL_PATTERN.search(input):
+            logger.warning(
+                f"Potential SQL injection attempt detected in address1: {input}"
             )
+            raise ValidationError("Invalid address format")
 
-        if not ADDRESS_PATTERN.match(address):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Address contains invalid characters",
+        # Checking for HTML/script injection
+        if HTML_PATTERN.search(input) or SCRIPT_PATTERN.search(input):
+            logger.warning(
+                f"Potential HTML/script injection attempt detected in address1: {input}"
             )
+            raise ValidationError("Invalid address format")
 
-        return address.strip()
+        # Checking for command injection
+        if COMMAND_PATTERN.search(input):
+            logger.warning(
+                f"Potential command injection attempt detected in address1: {input}"
+            )
+            raise ValidationError("Invalid address format")
+
+        # Sanitizing the input
+        sanitized = clean(input, strip=True)
+        sanitized = html.escape(sanitized)
+
+        # Removinh any remaining potentially dangerous characters
+        sanitized = re.sub(r"[^\w\s,.-]", "", sanitized)
+
+        return sanitized.strip()
 
     @staticmethod
     async def validate_ip(request: Request) -> str:

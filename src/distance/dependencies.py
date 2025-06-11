@@ -1,6 +1,6 @@
 from src.distance.service import DistanceService
 from src.geocoding.client import NominatimClient
-from src.database.client import MongoDBClient
+from src.database.mongodb import MongoDBClient
 
 
 async def get_distance_service() -> DistanceService:

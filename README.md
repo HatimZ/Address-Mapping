@@ -1,87 +1,49 @@
 # Address Distance API
 
-A FastAPI-based service that calculates distances between addresses using geocoding and provides search history functionality.
+A FastAPI application for calculating distances between addresses and maintaining a history of queries.
 
 ## Features
 
-- Address geocoding using Nominatim
-- Distance calculation between addresses
-- Search history tracking
-- MongoDB integration
-- Rate limiting and security features
-- Comprehensive error handling
-- Production-grade logging
+- Calculate distances between two addresses
+- Maintain history of distance calculations
+- Input validation and sanitization
+- Rate limiting
+- Caching
+- Pagination
 
-## Requirements
+## Implementation Details
 
-- Python 3.12
-- MongoDB
-- Docker (optional)
+### Security
 
-## Setup
+- Input sanitization for addresses before sending to third-party geocoding API
+- SQL injection prevention
+- XSS protection
+- Command injection prevention
+- HTML/script injection prevention
 
-1. Clone the repository:
+### Rate Limiting
 
-```bash
-git clone https://github.com/YOUR_USERNAME/address-distance-api.git
-cd address-distance-api
-```
+- Distance calculation: 5 requests per minute
+- History retrieval: 100 requests per minute
+- IP-based rate limiting
+- Configurable limits
 
-2. Create and activate virtual environment:
+### Caching Strategy
 
-```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
+- Distance calculations cached by address pairs (1-hour TTL)
+- History list cached by page and page size (1-hour TTL)
+- Automatic cache invalidation:
+  - New distance calculation invalidates history cache
+  - Each address pair has its own cache entry
+  - Cache keys based on input parameters
 
-# Unix/MacOS
-python3 -m venv venv
-source venv/bin/activate
-```
+### Pagination
 
-3. Install dependencies:
-
-```bash
-pip install -r requirements/base.txt
-```
-
-4. Create `.env` file:
-
-```env
-MONGODB_URL=mongodb://localhost:27017
-MONGODB_USERNAME=your_username
-MONGODB_PASSWORD=your_password
-MONGODB_DATABASE=address_distance
-NOMINATIM_BASE_URL=https://nominatim.openstreetmap.org
-NOMINATIM_USER_AGENT=AddressDistanceAPI/1.0
-```
-
-5. Run the application:
-
-```bash
-uvicorn src.main:app --reload --host 127.0.0.1 --port 8000
-```
-
-## Docker Setup
-
-1. Build the image:
-
-```bash
-docker build -t address-distance-api .
-```
-
-2. Run the container:
-
-```bash
-docker run -p 8000:8000 address-distance-api
-```
-
-## API Documentation
-
-Once the application is running, you can access:
-
-- Swagger UI: http://localhost:8000/api/v1/docs
-- ReDoc: http://localhost:8000/api/v1/redoc
+- History endpoint supports pagination
+- Configurable page size (1-100 records)
+- Page number starts at 1
+- Returns total count and total pages
+- Sorted by timestamp (newest first)
 
 ## API Endpoints
 
@@ -89,64 +51,53 @@ Once the application is running, you can access:
 
 ```http
 POST /api/v1/distance/calculate
-Content-Type: application/json
-
-{
-    "address1": "New York, NY",
-    "address2": "Los Angeles, CA"
-}
 ```
+
+Calculate distance between two addresses.
 
 ### Get History
 
 ```http
-GET /api/v1/history?limit=10
+GET /api/v1/history?page=1&page_size=10
 ```
+
+Get paginated history of distance calculations.
+
+## Setup
+
+1. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+2. Set up environment variables:
+
+```env
+MONGODB_URL=mongodb://localhost:27017
+MONGODB_DATABASE=address_distance
+NOMINATIM_BASE_URL=https://nominatim.openstreetmap.org
+NOMINATIM_USER_AGENT=AddressDistanceAPI/1.0
+```
+
+3. Run the application:
+
+```bash
+uvicorn src.main:app --reload
+```
+
+## Database
+
+The application uses a database-agnostic interface that can work with any database. Currently implemented for MongoDB, but can be easily extended to support other databases like PostgreSQL.
 
 ## Testing
 
-Run the test suite:
+Run tests with pytest:
 
 ```bash
 pytest
 ```
 
-Run specific test categories:
-
-```bash
-pytest -m unit  # Unit tests
-pytest -m integration  # Integration tests
-```
-
-## Project Structure
-
-```
-address-mapping/
-├── src/
-│   ├── distance/          # Distance calculation module
-│   ├── history/           # Query history module
-│   ├── geocoding/         # Geocoding service
-│   ├── database/          # Database client
-│   └── main.py           # Application entry point
-├── tests/
-│   ├── distance/         # Distance tests
-│   ├── history/          # History tests
-│   └── integration/      # Integration tests
-├── requirements/
-│   └── base.txt         # Dependencies
-├── Dockerfile
-├── docker-compose.yml
-└── README.md
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
 ## License
 
-This project is licensed under the MIT License.
+MIT

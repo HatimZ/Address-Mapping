@@ -17,7 +17,7 @@ async def test_save_query(database_client):
     database_client.collection = mock_collection
 
     query_data = {
-        "distance_km": 10.5,
+        "kilometers": 10.5,
         "address1": "New York, NY",
         "address2": "Los Angeles, CA",
     }
@@ -34,7 +34,7 @@ async def test_get_history(database_client):
     mock_cursor.to_list.return_value = [
         {
             "_id": "test_id",
-            "distance_km": 10.5,
+            "kilometers": 10.5,
             "address1": "New York, NY",
             "address2": "Los Angeles, CA",
             "timestamp": datetime.utcnow(),

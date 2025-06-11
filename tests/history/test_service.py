@@ -14,7 +14,7 @@ class MockDatabaseClient(DatabaseClient):
         return [
             {
                 "_id": "test_id",
-                "distance_km": 10.5,
+                "kilometers": 10.5,
                 "address1": "New York, NY",
                 "address2": "Los Angeles, CA",
                 "timestamp": datetime.utcnow().isoformat(),
@@ -38,7 +38,7 @@ async def test_get_history_success(history_service):
     assert result.limit == 10
     assert len(result.queries) == 1
     assert result.queries[0].query_id == "test_id"
-    assert result.queries[0].distance_km == 10.5
+    assert result.queries[0].kilometers == 10.5
     assert result.queries[0].address1 == "New York, NY"
     assert result.queries[0].address2 == "Los Angeles, CA"
 
