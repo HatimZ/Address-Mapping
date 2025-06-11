@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.inmemory import InMemoryBackend
+from fastapi.responses import JSONResponse
+
 
 from src.config import get_settings
 from src.distance.router import router as distance_router
@@ -23,8 +23,13 @@ settings = get_settings()
 
 app = FastAPI(
     title="Address Distance API",
-    description="API for calculating distances between addresses",
-    version="1.0.0",
+    version=settings.VERSION,
+    description="API for calculating distances between addresses and retrieving query history",
+    openapi_url=f"{settings.API_PREFIX}/openapi.json",
+    docs_url=f"{settings.API_PREFIX}/docs",
+    redoc_url=f"{settings.API_PREFIX}/redoc",
+    default_response_class=JSONResponse,
+    default_response_headers={},  # Disable default headers
 )
 
 
@@ -63,11 +68,6 @@ async def log_requests(request: Request, call_next):
     except Exception as e:
         security_logger.log_request(request, "error", str(e))
         raise
-
-
-@app.on_event("startup")
-async def startup():
-    FastAPICache.init(InMemoryBackend())
 
 
 app.include_router(distance_router, prefix=settings.API_PREFIX)

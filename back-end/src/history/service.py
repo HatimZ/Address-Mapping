@@ -1,5 +1,5 @@
 from src.history.schemas import HistoryListResponse, HistoryResponse, PaginationInfo
-from src.database.base import DatabaseClient
+from src.core.clients.database.base import DatabaseClient
 from typing import List
 import math
 
@@ -15,7 +15,7 @@ class HistoryService:
 
         total = await self.database_client.count()
         records = await self.database_client.find_many(
-            skip=skip, limit=page_size, sort_by="timestamp", sort_order="desc"
+            skip=skip, limit=page_size, sort_by="_id", sort_order="desc"
         )
 
         total_pages = math.ceil(total / page_size)
@@ -31,7 +31,6 @@ class HistoryService:
                 miles=record.get("miles"),
                 address1=record["address1"],
                 address2=record["address2"],
-                timestamp=record["timestamp"],
             )
             for record in records
         ]

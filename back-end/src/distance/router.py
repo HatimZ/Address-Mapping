@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, status, Request
 from src.distance.schemas import AddressRequest, DistanceResponse
 from src.distance.service import DistanceService
 from src.distance.dependencies import get_distance_service
-from src.core.security import SecurityService, limiter
+from src.core.security import limiter
 from src.core.exceptions import ValidationException, GeocodingException
+from src.core.dependencies import get_cache_client
+from src.core.clients.cache.cache import TTLCacheClient
 
-from fastapi_cache.decorator import cache
-from src.core.utils import invalidate_cache
 
 router = APIRouter(
     prefix="/distance",
@@ -26,21 +26,26 @@ router = APIRouter(
     description="Geocodes two addresses and calculates the distance between them in kilometers",
 )
 @limiter.limit("5/minute")
-@cache(
-    expire=3600,
-    namespace="distance",
-    key_builder=lambda *args, **kwargs: f"distance:{kwargs['address_request'].address1}:{kwargs['address_request'].address2}",
-)
 async def calculate_distance(
     request: Request,
     address_request: AddressRequest,
     service: DistanceService = Depends(get_distance_service),
+    cache: TTLCacheClient = Depends(get_cache_client),
 ) -> DistanceResponse:
     try:
+        # Try to get from cache first
+        cache_key = f"{address_request.address1}:{address_request.address2}"
+        cached_result = await cache.get(cache_key, "distance")
+        if cached_result:
+            return cached_result
+
         result = await service.calculate_distance(
             address_request.address1, address_request.address2
         )
-        await invalidate_cache("history", "history")
+
+        await cache.set(cache_key, result, "distance", ttl=3600)
+        await cache.clear_namespace("history")
+
         return result
     except ValidationException as e:
         raise ValidationException(str(e))

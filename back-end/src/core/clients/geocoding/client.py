@@ -1,8 +1,8 @@
 import httpx
 from typing import Dict, Any
 from src.config import get_settings
-from src.geocoding.base import GeocodingClient
-from src.geocoding.exceptions import GeocodingError
+from src.core.clients.geocoding.base import GeocodingClient
+from src.core.clients.geocoding.exceptions import GeocodingError
 from src.config import logger
 
 settings = get_settings()

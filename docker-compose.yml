@@ -2,14 +2,15 @@ version: "3.8"
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     ports:
       - "80:80"
+    env_file:
+      - .env
     environment:
-      - NODE_ENV=production
-      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app/backend
+      - PORT=3000
+      - HOST=0.0.0.0
     volumes:
       - ./logs:/app/logs
     restart: unless-stopped

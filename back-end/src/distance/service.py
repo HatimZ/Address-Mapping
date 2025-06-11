@@ -1,7 +1,7 @@
 from geopy.distance import geodesic
 from src.distance.schemas import DistanceResponse, GeoLocation
-from src.geocoding.base import GeocodingClient
-from src.database.base import DatabaseClient
+from src.core.clients.geocoding.base import GeocodingClient
+from src.core.clients.database.base import DatabaseClient
 from src.distance.exceptions import DistanceCalculationError
 from src.config import logger
 
@@ -26,7 +26,6 @@ class DistanceService:
 
             kilometers = geodesic(point1, point2).kilometers
             miles = geodesic(point1, point2).miles
-            logger.info(kilometers, miles)
 
             query_data = {
                 "kilometers": kilometers,

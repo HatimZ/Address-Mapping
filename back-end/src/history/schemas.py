@@ -11,7 +11,6 @@ class HistoryResponse(BaseModel):
     miles: Optional[float] = Field(None, description="Calculated distance in miles")
     address1: str = Field(..., description="First address used in calculation")
     address2: str = Field(..., description="Second address used in calculation")
-    timestamp: datetime = Field(..., description="When the query was executed")
 
 
 class PaginationInfo(BaseModel):

@@ -1,6 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from src.config import get_settings
-from src.database.base import DatabaseClient
+from src.core.clients.database.base import DatabaseClient
 from typing import List, Dict, Any, Optional
 import logging
 
