@@ -27,12 +27,11 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Add rate limiter
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
-# Configure CORS
 origins = [
     "localhost:5173",
     "http://127.0.0.1:5173",
@@ -48,14 +47,13 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-# Add exception handlers
+
 app.add_exception_handler(BaseAPIException, exception_handler)
 app.add_exception_handler(Exception, general_exception_handler)
 
 app.add_middleware(SlowAPIMiddleware)
 
 
-# Add middleware for request logging
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     try:
@@ -69,11 +67,9 @@ async def log_requests(request: Request, call_next):
 
 @app.on_event("startup")
 async def startup():
-    # Initialize cache
     FastAPICache.init(InMemoryBackend())
 
 
-# Add routers
 app.include_router(distance_router, prefix=settings.API_PREFIX)
 app.include_router(history_router, prefix=settings.API_PREFIX)
 

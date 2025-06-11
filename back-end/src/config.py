@@ -38,7 +38,6 @@ def setup_logger(name: str = None) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
 
-    # Console handler with simple format
     console_handler = logging.StreamHandler(sys.stdout)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     console_handler.setFormatter(formatter)
@@ -47,5 +46,4 @@ def setup_logger(name: str = None) -> logging.Logger:
     return logger
 
 
-# Create a default logger instance
 logger = setup_logger("address_distance_api")
