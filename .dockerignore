@@ -1,0 +1,80 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Dependencies
+node_modules
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Development
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+*.sublime-workspace
+*.sublime-project
+
+# Testing
+coverage
+.coverage
+htmlcov
+.pytest_cache
+.tox
+.nox
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Build outputs
+.svelte-kit
+.output
+build
+dist
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.docker
+
+# Documentation
+README.md
+CHANGELOG.md
+docs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache 

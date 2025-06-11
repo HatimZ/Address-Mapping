@@ -1,33 +1,28 @@
 @echo off
 
-REM Check Python version
-python --version 2>NUL | findstr /C:"Python 3.12" >NUL
-if errorlevel 1 (
-    echo Error: Python 3.12 is required
-    python --version
-    exit /b 1
-)
+:: Create necessary directories
+mkdir logs 2>nul
 
-REM Create virtual environment
+:: Setup frontend
+echo Setting up frontend...
+cd front-end
+call npm install
+call npm run build
+cd ..
+
+:: Setup backend
+echo Setting up backend...
 python -m venv venv
+call venv\Scripts\activate
+pip install -r back-end\requirements.txt
 
-REM Activate virtual environment
-call venv\Scripts\activate.bat
-
-REM Install dependencies
-python -m pip install --upgrade pip
-pip install -r requirements\base.txt
-
-REM Create .env file if it doesn't exist
+:: Create .env file if it doesn't exist
 if not exist .env (
     echo Creating .env file...
-    echo MONGODB_URL=mongodb://localhost:27017> .env
-    echo MONGODB_USERNAME=hatimzahid1995>> .env
-    echo MONGODB_PASSWORD=zD3KvZ7quY2xf77t>> .env
-    echo MONGODB_DATABASE=address_distance>> .env
-    echo NOMINATIM_BASE_URL=https://nominatim.openstreetmap.org>> .env
-    echo NOMINATIM_USER_AGENT=AddressDistanceAPI/1.0>> .env
+    (
+        echo NODE_ENV=development
+        echo PYTHONUNBUFFERED=1
+    ) > .env
 )
 
-REM Run the application
-uvicorn src.main:app --reload --host 127.0.0.1 --port 8000 
+echo Setup completed successfully! 

@@ -1,0 +1,29 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+.text-primary {
+	color: #222222;
+}
+
+.text-secondary {
+	color: #4b4949;
+}
+
+.primary-button {
+	color: white;
+	background-color: #d10001;
+	border: none;
+}
+
+.tertiary-button {
+	color: black;
+	background-color: inherit;
+	border: 1px solid black;
+}
+
+.secondary-button {
+	color: white;
+	background-color: black;
+	border: none;
+}
