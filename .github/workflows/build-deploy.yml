@@ -3,7 +3,7 @@ name: Run Actions
 on:
   push:
     branches:
-      - main
+      - prod
 
 jobs:
   deploy:
