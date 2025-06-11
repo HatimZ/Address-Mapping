@@ -4,6 +4,7 @@ WORKDIR /app/frontend
 COPY front-end/package*.json ./
 RUN npm install
 COPY front-end/ ./
+ENV PUBLIC_API_URL=http://test-loadbalancer-1968215287.us-east-1.elb.amazonaws.com
 RUN npm run build
 
 # Build stage for backend

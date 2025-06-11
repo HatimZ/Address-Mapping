@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     NOMINATIM_USER_AGENT: str = "AddressDistanceAPI/1.0"
     NOMINATIM_TIMEOUT: int = 10
     HISTORY_LIMIT: int = 100
+    PUBLIC_API_URL: str
 
     class Config:
         env_file = ".env"
