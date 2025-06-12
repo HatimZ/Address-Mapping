@@ -34,7 +34,7 @@ This project uses a single Docker container to build and run both the frontend (
 ### Running Locally
 
 1. **Prepare your environment variables**  
-   Create an `.env` file at the project root with the following variables (do not expose values, just variable names):
+   Create an `.env` file at the project root with the following variables
 
    ```env
    MONGODB_USERNAME=
@@ -136,29 +136,6 @@ GET /api/v1/history?page=1&page_size=10
 ```
 
 Get paginated history of distance calculations.
-
-## Setup
-
-1. Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-2. Set up environment variables:
-
-```env
-MONGODB_URL=mongodb://localhost:27017
-MONGODB_DATABASE=address_distance
-NOMINATIM_BASE_URL=https://nominatim.openstreetmap.org
-NOMINATIM_USER_AGENT=AddressDistanceAPI/1.0
-```
-
-3. Run the application:
-
-```bash
-uvicorn src.main:app --reload
-```
 
 ## Database
 
