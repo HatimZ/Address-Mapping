@@ -4,6 +4,7 @@ from src.config import get_settings
 from src.core.clients.geocoding.base import GeocodingClient
 from src.core.clients.geocoding.exceptions import GeocodingError
 from src.config import logger
+from src.distance.schemas import GeoLocation
 
 settings = get_settings()
 
@@ -14,7 +15,7 @@ class NominatimClient(GeocodingClient):
         self.headers = {"User-Agent": settings.NOMINATIM_USER_AGENT}
         self.timeout = settings.NOMINATIM_TIMEOUT
 
-    async def geocode(self, address: str) -> Dict[str, Any]:
+    async def geocode(self, address: str) -> GeoLocation:
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             try:
                 response = await client.get(
@@ -23,7 +24,6 @@ class NominatimClient(GeocodingClient):
                     headers=self.headers,
                 )
 
-                # Log detailed response information
                 logger.info(f"Response Status: {response.status_code}")
                 logger.info(f"Response Headers: {dict(response.headers)}")
                 logger.info(f"Response URL: {response.url}")
@@ -33,15 +33,18 @@ class NominatimClient(GeocodingClient):
                 results = response.json()
 
                 if not results:
-                    raise GeocodingError(f"No results found for address: {address}")
+                    print("NO RESULTSS")
+                    raise GeocodingError(
+                        f"No results found for address: {address}. The GeoCoding Client cannot code this address."
+                    )
 
                 result = results[0]
 
-                return {
-                    "latitude": float(result["lat"]),
-                    "longitude": float(result["lon"]),
-                    "address": result["display_name"],
-                }
+                return GeoLocation(
+                    latitude=float(result["lat"]),
+                    longitude=float(result["lon"]),
+                    address=result["display_name"],
+                )
             except httpx.HTTPError as e:
                 raise GeocodingError(f"Geocoding service error: {str(e)}")
             except (KeyError, ValueError) as e:

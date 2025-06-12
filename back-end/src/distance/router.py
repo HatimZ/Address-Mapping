@@ -6,7 +6,7 @@ from src.core.security import limiter
 from src.core.exceptions import ValidationException, GeocodingException
 from src.core.dependencies import get_cache_client
 from src.core.clients.cache.cache import TTLCacheClient
-
+from fastapi.responses import JSONResponse
 
 router = APIRouter(
     prefix="/distance",
@@ -50,4 +50,9 @@ async def calculate_distance(
     except ValidationException as e:
         raise ValidationException(str(e))
     except Exception as e:
-        raise GeocodingException("Failed to calculate distance", str(e))
+        error = str(e)
+        status = 500
+        if service.errors:
+            error = service.errors
+            status = 400
+        return JSONResponse(status_code=status, content={"errors": error})

@@ -4,18 +4,28 @@ from src.core.security import SecurityService
 
 class AddressRequest(BaseModel):
     address1: str = Field(
-        ..., max_length=200, description="First address for distance calculation"
+        ...,
+        max_length=200,
+        min_length=1,
+        description="First address for distance calculation",
     )
     address2: str = Field(
-        ..., max_length=200, description="Second address for distance calculation"
+        ...,
+        max_length=200,
+        min_length=1,
+        description="Second address for distance calculation",
     )
 
     @field_validator("address1")
     def validate_address1(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Address must not be empty or whitespace")
         return SecurityService.validate_input(v)
 
     @field_validator("address2")
     def validate_address2(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Address must not be empty or whitespace")
         return SecurityService.validate_input(v)
 
 

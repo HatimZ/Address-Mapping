@@ -12,45 +12,51 @@ class DistanceService:
     ):
         self.geocoding_client = geocoding_client
         self.database_client = database_client
+        self.errors = []
 
     async def calculate_distance(
         self, address1: str, address2: str
     ) -> DistanceResponse:
+
         try:
             location1 = await self.geocoding_client.geocode(address1)
+
+        except Exception as ex:
+            self.errors.append(str(ex))
+
+        try:
             location2 = await self.geocoding_client.geocode(address2)
-            logger.info(location1)
-            logger.info(location2)
-            point1 = (location1["latitude"], location1["longitude"])
-            point2 = (location2["latitude"], location2["longitude"])
 
-            kilometers = geodesic(point1, point2).kilometers
-            miles = geodesic(point1, point2).miles
+        except Exception as ex:
+            self.errors.append(str(ex))
 
-            query_data = {
-                "kilometers": kilometers,
-                "miles": miles,
-                "address1": location1["address"],
-                "address2": location2["address"],
-                "coordinates": {"point1": point1, "point2": point2},
-            }
+        print(self.errors)
+        if self.errors:
 
-            query_id = await self.database_client.create(query_data)
+            raise DistanceCalculationError(f"Failed to calculate distance")
 
-            return DistanceResponse(
-                kilometers=round(kilometers, 2),
-                miles=round(miles, 2),
-                address1=GeoLocation(
-                    latitude=location1["latitude"],
-                    longitude=location1["longitude"],
-                    address=location1["address"],
-                ),
-                address2=GeoLocation(
-                    latitude=location2["latitude"],
-                    longitude=location2["longitude"],
-                    address=location2["address"],
-                ),
-                query_id=query_id,
-            )
-        except Exception as e:
-            raise DistanceCalculationError(f"Failed to calculate distance: {str(e)}")
+        logger.info(location1)
+        logger.info(location2)
+        point1 = (location1.latitude, location1.longitude)
+        point2 = (location2.latitude, location2.longitude)
+
+        kilometers = geodesic(point1, point2).kilometers
+        miles = geodesic(point1, point2).miles
+
+        query_data = {
+            "kilometers": kilometers,
+            "miles": miles,
+            "address1": location1.address,
+            "address2": location2.address,
+            "coordinates": {"point1": point1, "point2": point2},
+        }
+
+        query_id = await self.database_client.create(query_data)
+
+        return DistanceResponse(
+            kilometers=round(kilometers, 2),
+            miles=round(miles, 2),
+            address1=location1,
+            address2=location2,
+            query_id=query_id,
+        )

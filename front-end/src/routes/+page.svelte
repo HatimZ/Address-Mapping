@@ -15,26 +15,35 @@
 	let loading = false;
 	let errorMsg = '';
 	let showToast = false;
+	let errorList: string[] = [];
 
 	function addressEmpty() {
 		return !address1.trim() || !address2.trim();
 	}
 
 	async function calculateDistanceHandler() {
-		loading = true;
-		errorMsg = '';
-		showToast = false;
-		distance = null;
-		try {
-			const body: DistanceRequest = { address1, address2 };
-			distance = await calculateDistance(body);
-		} catch (err) {
-			errorMsg = err instanceof Error ? err.message : 'Unknown error';
+	loading = true;
+	errorMsg = '';
+	errorList = [];
+	showToast = false;
+	distance = null;
+	try {
+		const body: DistanceRequest = { address1, address2 };
+		const result = await calculateDistance(body);
+		if ('errors' in result) {
+			errorList = result.errors;
 			showToast = true;
-		} finally {
-			loading = false;
+			return;
 		}
+		
+		distance = result;
+	} catch (err) {
+		errorMsg = err instanceof Error ? err.message : 'Unknown error';
+		showToast = true;
+	} finally {
+		loading = false;
 	}
+}
 </script>
 
 <Card>
@@ -97,9 +106,16 @@
 
 {#if showToast}
 	<div
-		class="fixed bottom-6 right-6 z-50 bg-red-600 text-white px-6 py-3 rounded shadow-lg animate-fade-in"
+		class="fixed bottom-6 right-6 z-50 bg-white border-2 border-red-600 text-red-700 px-6 py-3 rounded shadow-lg animate-fade-in"
 	>
-		{errorMsg}
+		<div class="font-bold text-lg mb-2">Calculation Error</div>
+		{#if errorList.length}
+			{#each errorList as err}
+				<div>{err}</div>
+			{/each}
+		{:else}
+			<div>{errorMsg}</div>
+		{/if}
 	</div>
 {/if}
 

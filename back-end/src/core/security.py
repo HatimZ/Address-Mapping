@@ -1,5 +1,4 @@
 from fastapi import Request, HTTPException, status
-from pydantic import ValidationError
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from typing import List, Optional
@@ -33,32 +32,33 @@ COMMAND_PATTERN = re.compile(r"[;&|`$]")
 class SecurityService:
     @staticmethod
     def validate_input(input: str) -> str:
-        # Checking for SQL injection attempts
         if SQL_PATTERN.search(input):
             logger.warning(
-                f"Potential SQL injection attempt detected in address1: {input}"
+                f"Potential SQL injection attempt detected in address: {input}"
             )
-            raise ValidationError("Invalid address format")
+            raise ValueError(
+                "Potential SQL injection attempt detected in address : Invalid address format"
+            )
 
-        # Checking for HTML/script injection
         if HTML_PATTERN.search(input) or SCRIPT_PATTERN.search(input):
             logger.warning(
-                f"Potential HTML/script injection attempt detected in address1: {input}"
+                f"Potential HTML/script injection attempt detected in address: {input}"
             )
-            raise ValidationError("Invalid address format")
+            raise ValueError(
+                "Potential HTML/script injection attempt detected in address : Invalid address format"
+            )
 
-        # Checking for command injection
         if COMMAND_PATTERN.search(input):
             logger.warning(
-                f"Potential command injection attempt detected in address1: {input}"
+                f"Potential command injection attempt detected in address: {input}"
             )
-            raise ValidationError("Invalid address format")
+            raise ValueError(
+                "Potential command injection attempt detected in address : Invalid address format"
+            )
 
-        # Sanitizing the input
         sanitized = clean(input, strip=True)
         sanitized = html.escape(sanitized)
 
-        # Removinh any remaining potentially dangerous characters
         sanitized = re.sub(r"[^\w\s,.-]", "", sanitized)
 
         return sanitized.strip()
