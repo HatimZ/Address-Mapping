@@ -11,6 +11,80 @@ A FastAPI application for calculating distances between addresses and maintainin
 - Caching
 - Pagination
 
+## How to Run
+
+### Overview
+
+This project uses a single Docker container to build and run both the frontend (SvelteKit) and backend (FastAPI) for simplicity.
+
+- **nginx** is used as a reverse proxy:
+
+  - Requests to `/` are routed to the SvelteKit frontend server (running on port 3000).
+  - Requests starting with `/api` are routed to the FastAPI backend server (running on port 8000).
+
+- **Frontend**: SvelteKit runs in preview mode for simplicity.
+- **Backend**: FastAPI runs on a Uvicorn server.
+
+### API Domain Configuration
+
+- The frontend has a `config.ts` file in `src/lib/api/` which specifies the backend API domain URL.
+- If running locally, set this variable to `http://localhost`.
+- In production, it points to the load balancer URL (see below).
+
+### Running Locally
+
+1. **Prepare your environment variables**  
+   Create an `.env` file at the project root with the following variables (do not expose values, just variable names):
+
+   ```env
+   MONGODB_USERNAME=
+   MONGODB_PASSWORD=
+   MONGODB_URL=
+   PUBLIC_API_URL=
+   APP_NAME=
+   VERSION=
+   API_PREFIX=
+   NOMINATIM_BASE_URL=
+   NOMINATIM_USER_AGENT=
+   ```
+
+2. **Build and run the Docker image**
+
+   ```bash
+   docker build . -t address-distance-app
+   docker run -p 80:80 address-distance-app
+   ```
+
+   This will start both the frontend and backend, accessible at [http://localhost](http://localhost).
+
+3. **Frontend routes**
+
+   - `/` — Calculation page
+   - `/history` — Historical queries page
+
+4. **Backend routes**
+
+   - `/api/v1/distance/calculate` — Calculate distance (POST)
+   - `/api/v1/history` — Fetch historical results (GET)
+
+5. **API Documentation**
+   - OpenAPI docs are available at `/api/v1/docs` for interactive API testing.
+
+### Production Deployment
+
+- Production deployment is done on AWS ECS with Fargate.
+- The app is served behind a load balancer.
+- The frontend's `config.ts` uses the load balancer URL for backend API requests.
+
+**Summary:**
+
+- All services run in a single Docker container for simplicity.
+- nginx routes requests to the correct service.
+- SvelteKit runs in preview mode, FastAPI runs on Uvicorn.
+- Configure your backend API URL in the frontend's `config.ts`.
+- Use an `.env` file for all required environment variables.
+- OpenAPI docs are available at `/api/v1/docs`.
+
 ## Implementation Details
 
 ### Security
