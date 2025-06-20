@@ -1,5 +1,5 @@
 from geopy.distance import geodesic
-from src.distance.schemas import DistanceResponse, GeoLocation
+from src.distance.schemas import DistanceModel, GeoLocation
 from src.core.clients.geocoding.base import GeocodingClient
 from src.core.clients.database.base import DatabaseClient
 from src.distance.exceptions import DistanceCalculationError
@@ -14,9 +14,7 @@ class DistanceService:
         self.database_client = database_client
         self.errors = []
 
-    async def calculate_distance(
-        self, address1: str, address2: str
-    ) -> DistanceResponse:
+    async def calculate_distance(self, address1: str, address2: str) -> DistanceModel:
 
         try:
             location1 = await self.geocoding_client.geocode(address1)
@@ -43,20 +41,18 @@ class DistanceService:
         kilometers = geodesic(point1, point2).kilometers
         miles = geodesic(point1, point2).miles
 
-        query_data = {
-            "kilometers": kilometers,
-            "miles": miles,
-            "address1": location1.address,
-            "address2": location2.address,
-            "coordinates": {"point1": point1, "point2": point2},
-        }
-
-        query_id = await self.database_client.create(query_data)
-
-        return DistanceResponse(
+        distance_model = DistanceModel(
             kilometers=round(kilometers, 2),
             miles=round(miles, 2),
-            address1=location1,
-            address2=location2,
-            query_id=query_id,
+            address1=location1.address,
+            address2=location2.address,
+            coordinates={"point1": point1, "point2": point2},
         )
+
+        query_id = await self.database_client.create(
+            distance_model.model_dump(by_alias=True, exclude=["id"])
+        )
+
+        created_student = await self.database_client.find_one({"_id": query_id})
+
+        return created_student

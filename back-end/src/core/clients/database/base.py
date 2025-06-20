@@ -19,6 +19,19 @@ class DatabaseClient(ABC):
         pass
 
     @abstractmethod
+    async def find_one(self, id: str):
+        """
+        Find one document with the specified id
+
+        Args:
+            id: Dictionary containing the record data
+
+        Returns:
+            str: ID of the created record
+        """
+        pass
+
+    @abstractmethod
     async def find_many(
         self,
         skip: int = 0,
