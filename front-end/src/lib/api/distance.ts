@@ -1,6 +1,5 @@
 import type { DistanceRequest, DistanceResponse } from '$lib/types';
-import { API_URL } from './config';
-
+import { PUBLIC_API_BASE_URL } from '$env/static/public';
 // Define a type for the detail error array
 interface DetailError {
 	msg: string;
@@ -9,7 +8,7 @@ interface DetailError {
 export async function calculateDistance(
 	body: DistanceRequest
 ): Promise<DistanceResponse | { errors: string[] }> {
-	const res = await fetch(`${API_URL}/api/v1/distance/calculate`, {
+	const res = await fetch(`${PUBLIC_API_BASE_URL}/distance/calculate`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(body)

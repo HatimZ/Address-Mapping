@@ -1,8 +1,8 @@
 import type { HistoryResponse } from '$lib/types';
-import { API_URL } from './config';
+import { PUBLIC_API_BASE_URL } from '$env/static/public';
 
 export async function getHistoricalQueries(page = 1, page_size = 5): Promise<HistoryResponse> {
-	const res = await fetch(`${API_URL}/api/v1/history?page=${page}&page_size=${page_size}`, {
+	const res = await fetch(`${PUBLIC_API_BASE_URL}/history?page=${page}&page_size=${page_size}`, {
 		method: 'GET',
 		headers: {
 			Accept: 'application/json',

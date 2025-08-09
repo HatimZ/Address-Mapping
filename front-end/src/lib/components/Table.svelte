@@ -1,14 +1,10 @@
 <script lang="ts">
-	export let headers: string[] = [];
-	export let data: any[] = [];
-	export let title: string | null = null;
-	export let subtitle: string | null = null;
-	export let page: number = 1;
-	export let pageSize: number = 5;
-	export let total: number = 0;
-	export let onPageChange: (page: number) => void = () => {};
 
-	$: pageCount = Math.ceil(total / pageSize);
+
+	let {headers, data, title , subtitle , page  = 1, pageSize  = 5, total = 0 , onPageChange} = $props();
+
+
+	let pageCount = $derived(Math.ceil(total / pageSize));
 
 	function gotoPage(p: number) {
 		if (p >= 1 && p <= pageCount) onPageChange(p);

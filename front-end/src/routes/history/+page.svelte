@@ -4,7 +4,7 @@
 	import Table from '$lib/components/Table.svelte';
 	import type { HistoryResponse, Query } from '$lib/types';
 	import { getHistoricalQueries } from '$lib/api/history';
-
+	import { setTitle } from '$lib/state.svelte';
 	let historicalQueries: Query[] = [];
 	let loading = true;
 	let errorMsg = '';
@@ -34,7 +34,8 @@
 		}
 	}
 
-	onMount(() => {
+	onMount(() => {  
+		setTitle('History Page')
 		fetchPage(1);
 	});
 
@@ -42,7 +43,7 @@
 		fetchPage(p);
 	}
 
-	$: tableData = historicalQueries.map((q) => ({
+	$: data = historicalQueries.map((q) => ({
 		'Source Address': q.address1,
 		'Destination Address': q.address2,
 		'Distance in Miles': q.miles?.toFixed(2) || '-',
@@ -53,7 +54,7 @@
 <Card>
 	<Table
 		{headers}
-		data={tableData}
+		{data}
 		title="Historical Queries"
 		subtitle="History of the user's queries."
 		{page}
